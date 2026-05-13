@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0f172a"/>
+<title>Family Expenses</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #0f172a;
+  --bg2:      #1e293b;
+  --bg3:      #293548;
+  --border:   #334155;
+  --text:     #f1f5f9;
+  --muted:    #94a3b8;
+  --accent:   #38bdf8;
+  --accent2:  #818cf8;
+  --green:    #34d399;
+  --red:      #f87171;
+  --amber:    #fbbf24;
+  --font:     'DM Sans', sans-serif;
+  --mono:     'DM Mono', monospace;
+  --radius:   12px;
+  --radius-sm:8px;
+  --shadow:   0 4px 24px rgba(0,0,0,0.4);
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; }
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Layout ───────────────────────────────────────────────── */
+#app { display: flex; flex-direction: column; min-height: 100vh; }
+.screen { display: none; flex-direction: column; flex: 1; }
+.screen.active { display: flex; }
+
+/* ── Login ────────────────────────────────────────────────── */
+#login-screen {
+  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 60% 20%, #1e3a5f 0%, var(--bg) 60%);
+  padding: 2rem;
+}
+.login-card {
+  width: 100%; max-width: 360px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 2.5rem 2rem;
+  box-shadow: var(--shadow);
+}
+.login-logo { font-size: 2rem; margin-bottom: 0.25rem; }
+.login-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.25rem; }
+.login-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+.login-card input {
+  width: 100%; padding: 0.75rem 1rem;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font); font-size: 1rem;
+  margin-bottom: 1rem; outline: none; transition: border 0.2s;
+}
+.login-card input:focus { border-color: var(--accent); }
+.btn-primary {
+  width: 100%; padding: 0.75rem;
+  background: var(--accent); color: #0f172a;
+  border: none; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.login-error { color: var(--red); font-size: 0.82rem; margin-top: 0.5rem; }
+
+/* ── Top bar ──────────────────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar-title { font-weight: 600; font-size: 1rem; }
+.topbar-user {
+  font-size: 0.78rem; color: var(--muted);
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; padding: 0.25rem 0.75rem; cursor: pointer;
+}
+.topbar-user:hover { color: var(--text); }
+
+/* ── Bottom nav ───────────────────────────────────────────── */
+.bottomnav {
+  display: flex; background: var(--bg2);
+  border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; z-index: 10;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; padding: 0.75rem 0.5rem;
+  background: none; border: none; color: var(--muted);
+  font-family: var(--font); font-size: 0.68rem; cursor: pointer;
+  transition: color 0.2s; border-top: 2px solid transparent;
+}
+.nav-btn.active { color: var(--accent); border-top-color: var(--accent); }
+.nav-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Content area ─────────────────────────────────────────── */
+.content { flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: 1.5rem; }
+
+/* ── Cards ────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: 0.75rem;
+}
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.card-title { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Metric row ───────────────────────────────────────────── */
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.75rem; }
+.metric { background: var(--bg3); border-radius: var(--radius-sm); padding: 0.9rem 1rem; }
+.metric-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; }
+.metric-val { font-size: 1.4rem; font-weight: 600; font-family: var(--mono); }
+.metric-val.green { color: var(--green); }
+.metric-val.amber { color: var(--amber); }
+.metric-val.accent { color: var(--accent); }
+
+/* ── Form ─────────────────────────────────────────────────── */
+.form-group { margin-bottom: 0.9rem; }
+.form-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.35rem; display: block; }
+.form-input, .form-select {
+  width: 100%; padding: 0.7rem 0.9rem;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font); font-size: 0.95rem; outline: none;
+  transition: border 0.2s; appearance: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.form-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.25rem; }
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn {
+  padding: 0.65rem 1.1rem; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.88rem; font-weight: 500;
+  cursor: pointer; border: none; transition: opacity 0.2s;
+}
+.btn-accent { background: var(--accent); color: #0f172a; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); }
+.btn-sm { padding: 0.4rem 0.75rem; font-size: 0.78rem; }
+.btn:hover { opacity: 0.8; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-full { width: 100%; }
+
+/* ── Expense list ─────────────────────────────────────────── */
+.expense-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+}
+.expense-item:last-child { border-bottom: none; }
+.exp-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg3); display: flex; align-items: center;
+  justify-content: center; font-size: 1rem; flex-shrink: 0;
+}
+.exp-info { flex: 1; min-width: 0; }
+.exp-cat { font-size: 0.88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.exp-right { text-align: right; flex-shrink: 0; }
+.exp-amt { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+.exp-who { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.badge {
+  display: inline-block; font-size: 0.65rem; padding: 1px 6px;
+  border-radius: 10px; font-weight: 500;
+  background: var(--bg3); color: var(--muted);
+}
+.badge-cc { background: rgba(56,189,248,0.12); color: var(--accent); }
+
+/* ── Filters bar ──────────────────────────────────────────── */
+.filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.filter-select {
+  padding: 0.4rem 0.65rem; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 20px;
+  color: var(--text); font-family: var(--font); font-size: 0.78rem;
+  outline: none; cursor: pointer;
+}
+
+/* ── CC panel ─────────────────────────────────────────────── */
+.cc-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+}
+.cc-card:last-child { border-bottom: none; }
+.cc-name { font-size: 0.88rem; font-weight: 500; }
+.cc-last4 { font-size: 0.72rem; color: var(--muted); font-family: var(--mono); }
+.cc-amt { font-family: var(--mono); font-weight: 600; font-size: 1rem; color: var(--amber); }
+.cc-cleared { color: var(--green); }
+
+/* ── Budget bars ──────────────────────────────────────────── */
+.budget-row { margin-bottom: 0.9rem; }
+.budget-meta { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.3rem; }
+.budget-bar-bg { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.budget-bar { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+/* ── Setup list ───────────────────────────────────────────── */
+.setup-list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+}
+.setup-list-item:last-child { border-bottom: none; }
+.setup-section-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+
+/* ── Month picker ─────────────────────────────────────────── */
+.month-nav { display: flex; align-items: center; gap: 0.5rem; }
+.month-nav button {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  width: 32px; height: 32px; cursor: pointer; font-size: 1rem;
+}
+.month-label { font-family: var(--mono); font-size: 0.85rem; min-width: 90px; text-align: center; }
+
+/* ── Toast ────────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0.6rem 1.2rem;
+  font-size: 0.85rem; opacity: 0; transition: all 0.3s; z-index: 100;
+  white-space: nowrap; box-shadow: var(--shadow);
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { border-color: var(--green); color: var(--green); }
+#toast.error   { border-color: var(--red);   color: var(--red); }
+
+/* ── Loading ──────────────────────────────────────────────── */
+.spinner {
+  width: 20px; height: 20px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay {
+  display: none; position: fixed; inset: 0; z-index: 50;
+  align-items: center; justify-content: center;
+  background: rgba(15,23,42,0.6);
+}
+.loading-overlay.show { display: flex; }
+
+/* ── Tab bar ──────────────────────────────────────────────── */
+.tabbar { display: flex; gap: 0.4rem; margin-bottom: 1rem; }
+.tab-btn {
+  padding: 0.4rem 0.9rem; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 20px;
+  color: var(--muted); font-family: var(--font);
+  font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+}
+.tab-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 500; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (min-width: 480px) {
+  .content { max-width: 600px; margin: 0 auto; }
+  .topbar, .bottomnav { max-width: 600px; margin: 0 auto; width: 100%; }
+  .topbar { border-radius: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── Loading overlay ───────────────────────────────────── -->
+<div class="loading-overlay" id="loading"><div class="spinner"></div></div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  LOGIN SCREEN                                           -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div id="app">
+<div class="screen active" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🏠</div>
+    <div class="login-title">Family Expenses</div>
+    <div class="login-sub">Enter your password to continue</div>
+    <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password"/>
+    <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  MAIN APP                                               -->
+<!-- ════════════════════════════════════════════════════════ -->
+<div class="screen" id="main-screen">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-user" onclick="doLogout()" id="topbar-user">—</div>
+  </div>
+
+  <!-- ── DASHBOARD ───────────────────────────────────────── -->
+  <div class="content" id="tab-dashboard">
+    <div class="card-head" style="margin-bottom:0.75rem">
+      <span class="card-title">Overview</span>
+      <div class="month-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <span class="month-label" id="dash-month-label">—</span>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Total spent</div>
+        <div class="metric-val accent" id="dash-total">₹0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Transactions</div>
+        <div class="metric-val" id="dash-count">0</div>
+      </div>
+    </div>
+
+    <!-- Person split -->
+    <div class="card" id="dash-person-card">
+      <div class="card-head"><span class="card-title">By person</span></div>
+      <div id="dash-person-list"></div>
+    </div>
+
+    <!-- Category chart -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">By category</span></div>
+      <canvas id="chart-category" height="180"></canvas>
+    </div>
+
+    <!-- Payment mode chart -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">By payment mode</span></div>
+      <canvas id="chart-mode" height="160"></canvas>
+    </div>
+
+    <!-- Monthly trend -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">Monthly trend</span></div>
+      <canvas id="chart-trend" height="160"></canvas>
+    </div>
+
+    <!-- Budget -->
+    <div class="card" id="budget-card">
+      <div class="card-head"><span class="card-title">Budget usage</span></div>
+      <div id="budget-list"></div>
+    </div>
+
+    <!-- Credit cards -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">Credit cards</span></div>
+      <div id="cc-list"></div>
+    </div>
+  </div>
+
+  <!-- ── ADD EXPENSE ──────────────────────────────────────── -->
+  <div class="content" id="tab-add" style="display:none">
+    <div class="card">
+      <div class="setup-section-title">Add Expense</div>
+
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <input class="form-input" type="number" inputmode="decimal" id="add-amount" placeholder="0.00"/>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="add-category"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" id="add-date"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Payment mode</label>
+        <select class="form-select" id="add-mode" onchange="handleModeChange()"></select>
+      </div>
+
+      <div class="form-group" id="add-card-group" style="display:none">
+        <label class="form-label">Credit card</label>
+        <select class="form-select" id="add-card"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Note (optional)</label>
+        <input class="form-input" type="text" id="add-note" placeholder="Swiggy, petrol, groceries…"/>
+      </div>
+
+      <button class="btn btn-accent btn-full" style="margin-top:0.5rem" onclick="submitExpense()">Add expense</button>
+    </div>
+  </div>
+
+  <!-- ── HISTORY ──────────────────────────────────────────── -->
+  <div class="content" id="tab-history" style="display:none">
+    <div class="filters">
+      <select class="filter-select" id="hist-month" onchange="renderHistory()"></select>
+      <select class="filter-select" id="hist-cat" onchange="renderHistory()">
+        <option value="">All categories</option>
+      </select>
+      <select class="filter-select" id="hist-person" onchange="renderHistory()">
+        <option value="">All people</option>
+      </select>
+      <select class="filter-select" id="hist-mode" onchange="renderHistory()">
+        <option value="">All modes</option>
+      </select>
+    </div>
+    <div id="history-list"></div>
+  </div>
+
+  <!-- ── SETUP ────────────────────────────────────────────── -->
+  <div class="content" id="tab-setup" style="display:none">
+
+    <div class="tabbar">
+      <button class="tab-btn active" onclick="switchSetupTab('categories')">Categories</button>
+      <button class="tab-btn" onclick="switchSetupTab('modes')">Modes</button>
+      <button class="tab-btn" onclick="switchSetupTab('cards')">Cards</button>
+      <button class="tab-btn" id="users-tab-btn" onclick="switchSetupTab('users')" style="display:none">Users</button>
+    </div>
+
+    <!-- Categories -->
+    <div id="setup-categories">
+      <div class="card" style="margin-bottom:0.75rem">
+        <div class="setup-section-title">Categories</div>
+        <div id="cat-list"></div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="new-cat-name" placeholder="e.g. Petrol"/></div>
+          <div class="form-group"><label class="form-label">Budget (₹)</label><input class="form-input" type="number" id="new-cat-budget" placeholder="5000"/></div>
+        </div>
+        <button class="btn btn-accent" onclick="addCategory()">Add category</button>
+      </div>
+    </div>
+
+    <!-- Payment modes -->
+    <div id="setup-modes" style="display:none">
+      <div class="card" style="margin-bottom:0.75rem">
+        <div class="setup-section-title">Payment modes</div>
+        <div id="mode-list"></div>
+      </div>
+      <div class="card">
+        <div class="form-group"><label class="form-label">Mode name</label><input class="form-input" id="new-mode-name" placeholder="e.g. Cheque"/></div>
+        <button class="btn btn-accent" onclick="addMode()">Add mode</button>
+      </div>
+    </div>
+
+    <!-- Credit cards -->
+    <div id="setup-cards" style="display:none">
+      <div class="card" style="margin-bottom:0.75rem">
+        <div class="setup-section-title">Credit cards</div>
+        <div id="cards-list"></div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Card name</label><input class="form-input" id="new-card-name" placeholder="HDFC Millennia"/></div>
+          <div class="form-group"><label class="form-label">Last 4 digits</label><input class="form-input" type="number" id="new-card-last4" placeholder="4521" maxlength="4"/></div>
+        </div>
+        <button class="btn btn-accent" onclick="addCard()">Add card</button>
+      </div>
+    </div>
+
+    <!-- Users (admin only) -->
+    <div id="setup-users" style="display:none">
+      <div class="card" style="margin-bottom:0.75rem">
+        <div class="setup-section-title">Users</div>
+        <div id="users-list"></div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="new-user-name" placeholder="Family member"/></div>
+          <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="new-user-pass" placeholder="secret123"/></div>
+        </div>
+        <button class="btn btn-accent" onclick="addUser()">Add user</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom nav -->
+  <nav class="bottomnav">
+    <button class="nav-btn active" onclick="switchTab('dashboard')" id="nav-dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-btn" onclick="switchTab('add')" id="nav-add">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Add
+    </button>
+    <button class="nav-btn" onclick="switchTab('history')" id="nav-history">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      History
+    </button>
+    <button class="nav-btn" onclick="switchTab('setup')" id="nav-setup">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Setup
+    </button>
+  </nav>
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONFIG — replace with your deployed Apps Script URL
+// ════════════════════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbwSLEFHSRU5DqCbA-ME4HIzy6h5dUzmx828WvA7mVnOTkPOavQZEotjCS1qZNVmT7pE/exec";
+
+// ── State ─────────────────────────────────────────────────
+let state = {
+  user: null,
+  isAdmin: false,
+  config: { categories: [], modes: [], cards: [] },
+  expenses: [],
+  summary: [],
+  ccPending: [],
+  currentMonth: "",
+  activeTab: "dashboard",
+  charts: {}
+};
+
+// ── Utils ─────────────────────────────────────────────────
+function fmt(n) { return "₹" + Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
+function today() { return new Date().toISOString().split("T")[0]; }
+function currentYM() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
+function ymLabel(ym) {
+  const [y,m] = ym.split("-");
+  return new Date(y, m-1).toLocaleString("en-IN", { month: "short", year: "numeric" });
+}
+
+function showToast(msg, type = "success") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  setTimeout(() => el.className = "", 2500);
+}
+
+function loading(show) {
+  document.getElementById("loading").classList.toggle("show", show);
+}
+
+async function api(params, body = null) {
+  if (body) {
+    const r = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" }
+    });
+    return r.json();
+  } else {
+    const qs = new URLSearchParams(params).toString();
+    const r = await fetch(`${API_URL}?${qs}`);
+    return r.json();
+  }
+}
+
+// ── Auth ──────────────────────────────────────────────────
+async function doLogin() {
+  const pw = document.getElementById("login-password").value.trim();
+  if (!pw) return;
+  loading(true);
+  try {
+    const res = await api({ action: "login", password: pw });
+    if (res.ok) {
+      state.user    = res.name;
+      state.isAdmin = res.isAdmin;
+      sessionStorage.setItem("user", res.name);
+      sessionStorage.setItem("isAdmin", res.isAdmin);
+      document.getElementById("topbar-user").textContent = res.name + " · logout";
+      document.getElementById("login-error").textContent = "";
+      await initApp();
+    } else {
+      document.getElementById("login-error").textContent = "Wrong password. Try again.";
+    }
+  } catch(e) {
+    document.getElementById("login-error").textContent = "Cannot reach server. Check API_URL.";
+  }
+  loading(false);
+}
+
+document.getElementById("login-password").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+function doLogout() {
+  sessionStorage.clear();
+  location.reload();
+}
+
+// ── Init ──────────────────────────────────────────────────
+async function initApp() {
+  state.currentMonth = currentYM();
+  showScreen("main-screen");
+
+  if (state.isAdmin) {
+    document.getElementById("users-tab-btn").style.display = "";
+  }
+
+  loading(true);
+  try {
+    const [cfg, exp, sum, cc] = await Promise.all([
+      api({ action: "config" }),
+      api({ action: "expenses", month: state.currentMonth }),
+      api({ action: "summary" }),
+      api({ action: "cc_pending" })
+    ]);
+    state.config   = cfg;
+    state.expenses = exp.expenses || [];
+    state.summary  = sum.summary  || [];
+    state.ccPending= cc.pending   || [];
+  } catch(e) {
+    showToast("Failed to load data", "error");
+  }
+  loading(false);
+
+  populateFormDropdowns();
+  populateHistoryFilters();
+  renderDashboard();
+  renderSetup();
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ── Tab navigation ────────────────────────────────────────
+function switchTab(tab) {
+  ["dashboard","add","history","setup"].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display  = t === tab ? "" : "none";
+    document.getElementById(`nav-${t}`).classList.toggle("active", t === tab);
+  });
+  const titles = { dashboard: "Dashboard", add: "Add Expense", history: "History", setup: "Setup" };
+  document.getElementById("topbar-title").textContent = titles[tab];
+  state.activeTab = tab;
+  if (tab === "history") renderHistory();
+}
+
+// ── Dropdowns ─────────────────────────────────────────────
+function populateFormDropdowns() {
+  const catSel  = document.getElementById("add-category");
+  const modeSel = document.getElementById("add-mode");
+  const cardSel = document.getElementById("add-card");
+
+  catSel.innerHTML = state.config.categories.map(c =>
+    `<option value="${c.name}">${c.name}</option>`).join("");
+
+  modeSel.innerHTML = state.config.modes.map(m =>
+    `<option value="${m}">${m}</option>`).join("");
+
+  cardSel.innerHTML = state.config.cards.map(c =>
+    `<option value="${c.name}">${c.name} ···${c.last4}</option>`).join("");
+
+  document.getElementById("add-date").value = today();
+}
+
+function handleModeChange() {
+  const mode = document.getElementById("add-mode").value;
+  const show = mode === "Credit Card" && state.config.cards.length > 0;
+  document.getElementById("add-card-group").style.display = show ? "" : "none";
+}
+
+function populateHistoryFilters() {
+  const monthSel  = document.getElementById("hist-month");
+  const catSel    = document.getElementById("hist-cat");
+  const personSel = document.getElementById("hist-person");
+  const modeSel   = document.getElementById("hist-mode");
+
+  const months = [...new Set(state.summary.map(s => s.month))].sort().reverse();
+  monthSel.innerHTML = months.map(m =>
+    `<option value="${m}" ${m === state.currentMonth ? "selected" : ""}>${ymLabel(m)}</option>`
+  ).join("");
+
+  state.config.categories.forEach(c => {
+    catSel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+  });
+
+  const people = [...new Set(state.expenses.map(e => e.addedBy))].filter(Boolean);
+  people.forEach(p => { personSel.innerHTML += `<option value="${p}">${p}</option>`; });
+
+  state.config.modes.forEach(m => { modeSel.innerHTML += `<option value="${m}">${m}</option>`; });
+}
+
+// ── Dashboard ─────────────────────────────────────────────
+function renderDashboard() {
+  document.getElementById("dash-month-label").textContent = ymLabel(state.currentMonth);
+
+  const monthData = state.summary.find(s => s.month === state.currentMonth);
+  const total  = monthData ? monthData.total : 0;
+  const exps   = state.expenses;
+
+  document.getElementById("dash-total").textContent = fmt(total);
+  document.getElementById("dash-count").textContent = exps.length;
+
+  // Person split
+  const byPerson = monthData ? monthData.byPerson : {};
+  const personHtml = Object.entries(byPerson).map(([name, amt]) => `
+    <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:0.88rem">${name}</span>
+      <span style="font-family:var(--mono);font-size:0.88rem">${fmt(amt)}</span>
+    </div>`).join("");
+  document.getElementById("dash-person-list").innerHTML = personHtml || `<span style="color:var(--muted);font-size:0.85rem">No data</span>`;
+
+  // Charts
+  const catData  = monthData ? monthData.byCategory : {};
+  const modeData = monthData ? monthData.byMode : {};
+
+  renderBarChart("chart-category",
+    Object.keys(catData), Object.values(catData),
+    ["#38bdf8","#818cf8","#34d399","#fbbf24","#f87171","#fb923c","#a78bfa","#22d3ee","#86efac"]
+  );
+  renderDoughnut("chart-mode",
+    Object.keys(modeData), Object.values(modeData)
+  );
+
+  // Trend (last 6 months)
+  const trend = state.summary.slice(0, 6).reverse();
+  renderLineChart("chart-trend",
+    trend.map(s => ymLabel(s.month)), trend.map(s => s.total)
+  );
+
+  // Budget
+  const budgetEl = document.getElementById("budget-list");
+  budgetEl.innerHTML = state.config.categories
+    .filter(c => c.budget > 0)
+    .map(c => {
+      const spent = catData[c.name] || 0;
+      const pct   = Math.min(100, Math.round((spent / c.budget) * 100));
+      const color = pct > 90 ? "var(--red)" : pct > 70 ? "var(--amber)" : "var(--green)";
+      return `<div class="budget-row">
+        <div class="budget-meta">
+          <span style="font-size:0.82rem">${c.name}</span>
+          <span style="font-size:0.78rem;color:var(--muted)">${fmt(spent)} / ${fmt(c.budget)}</span>
+        </div>
+        <div class="budget-bar-bg"><div class="budget-bar" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+    }).join("") || `<span style="color:var(--muted);font-size:0.85rem">Set budgets in Setup → Categories</span>`;
+
+  // CC pending
+  const ccEl = document.getElementById("cc-list");
+  if (!state.ccPending.length) {
+    ccEl.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">No credit cards added</span>`;
+  } else {
+    ccEl.innerHTML = state.ccPending.map(c => `
+      <div class="cc-card">
+        <div>
+          <div class="cc-name">${c.card}</div>
+          <div class="cc-last4">···· ${c.last4 || "—"}</div>
+          ${c.lastCleared ? `<div style="font-size:0.7rem;color:var(--muted);margin-top:2px">Cleared: ${c.lastCleared}</div>` : ""}
+        </div>
+        <div style="text-align:right">
+          <div class="cc-amt ${c.pending === 0 ? "cc-cleared" : ""}">${fmt(c.pending)}</div>
+          ${c.pending > 0 ? `<button class="btn btn-outline btn-sm" style="margin-top:6px" onclick="clearCC('${c.card}')">Clear bill</button>` : `<span style="font-size:0.72rem;color:var(--green)">✓ Cleared</span>`}
+        </div>
+      </div>`).join("");
+  }
+}
+
+async function changeMonth(dir) {
+  const [y, m] = state.currentMonth.split("-").map(Number);
+  const d = new Date(y, m - 1 + dir);
+  state.currentMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  loading(true);
+  try {
+    const res = await api({ action: "expenses", month: state.currentMonth });
+    state.expenses = res.expenses || [];
+    const sum = await api({ action: "summary" });
+    state.summary = sum.summary || [];
+  } catch(e) {}
+  loading(false);
+  renderDashboard();
+}
+
+// ── Chart helpers ─────────────────────────────────────────
+function destroyChart(id) {
+  if (state.charts[id]) { state.charts[id].destroy(); delete state.charts[id]; }
+}
+
+function renderBarChart(id, labels, data, colors) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext("2d");
+  state.charts[id] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors || "#38bdf8", borderRadius: 6, borderSkipped: false }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#94a3b8", font: { size: 11 } }, grid: { display: false } },
+        y: { ticks: { color: "#94a3b8", font: { size: 11 }, callback: v => "₹"+v.toLocaleString("en-IN") }, grid: { color: "#334155" } }
+      }
+    }
+  });
+}
+
+function renderDoughnut(id, labels, data) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext("2d");
+  state.charts[id] = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: ["#38bdf8","#818cf8","#34d399","#fbbf24","#f87171","#fb923c"], borderWidth: 0 }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "right", labels: { color: "#94a3b8", font: { size: 11 }, padding: 12 } }
+      }
+    }
+  });
+}
+
+function renderLineChart(id, labels, data) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext("2d");
+  state.charts[id] = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data, borderColor: "#38bdf8", backgroundColor: "rgba(56,189,248,0.08)",
+        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: "#38bdf8"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#94a3b8", font: { size: 11 } }, grid: { display: false } },
+        y: { ticks: { color: "#94a3b8", font: { size: 11 }, callback: v => "₹"+v.toLocaleString("en-IN") }, grid: { color: "#334155" } }
+      }
+    }
+  });
+}
+
+// ── Add expense ───────────────────────────────────────────
+async function submitExpense() {
+  const amount   = parseFloat(document.getElementById("add-amount").value);
+  const category = document.getElementById("add-category").value;
+  const date     = document.getElementById("add-date").value;
+  const mode     = document.getElementById("add-mode").value;
+  const card     = mode === "Credit Card" ? document.getElementById("add-card").value : "";
+  const note     = document.getElementById("add-note").value.trim();
+
+  if (!amount || amount <= 0) { showToast("Enter a valid amount", "error"); return; }
+  if (!category) { showToast("Pick a category", "error"); return; }
+
+  loading(true);
+  try {
+    const res = await api(null, { action: "addExpense", amount, category, date, mode, card, note, addedBy: state.user });
+    if (res.ok) {
+      showToast("Expense added ✓");
+      document.getElementById("add-amount").value = "";
+      document.getElementById("add-note").value   = "";
+      document.getElementById("add-date").value   = today();
+      // Refresh data
+      const [exp, sum, cc] = await Promise.all([
+        api({ action: "expenses", month: state.currentMonth }),
+        api({ action: "summary" }),
+        api({ action: "cc_pending" })
+      ]);
+      state.expenses  = exp.expenses || [];
+      state.summary   = sum.summary  || [];
+      state.ccPending = cc.pending   || [];
+      renderDashboard();
+    } else {
+      showToast(res.error || "Failed", "error");
+    }
+  } catch(e) { showToast("Network error", "error"); }
+  loading(false);
+}
+
+// ── History ───────────────────────────────────────────────
+async function renderHistory() {
+  const month  = document.getElementById("hist-month").value;
+  const cat    = document.getElementById("hist-cat").value;
+  const person = document.getElementById("hist-person").value;
+  const mode   = document.getElementById("hist-mode").value;
+
+  loading(true);
+  try {
+    const res = await api({ action: "expenses", month });
+    state.expenses = res.expenses || [];
+  } catch(e) {}
+  loading(false);
+
+  let list = state.expenses;
+  if (cat)    list = list.filter(e => e.category === cat);
+  if (person) list = list.filter(e => e.addedBy === person);
+  if (mode)   list = list.filter(e => e.mode === mode);
+
+  list = list.slice().sort((a,b) => b.date.localeCompare(a.date));
+
+  const catEmoji = { "Groceries":"🛒","Rent / EMI":"🏠","Transport":"🚗","Eating Out":"🍽️","Medical":"💊","Utilities":"⚡","Entertainment":"🎬","Shopping":"🛍️","Others":"📦" };
+
+  const el = document.getElementById("history-list");
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--muted)">No expenses found</div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="card">${list.map(e => `
+    <div class="expense-item">
+      <div class="exp-icon">${catEmoji[e.category] || "💰"}</div>
+      <div class="exp-info">
+        <div class="exp-cat">${e.category} ${e.mode === "Credit Card" ? `<span class="badge badge-cc">CC</span>` : ""}</div>
+        <div class="exp-meta">${e.date} · ${e.mode}${e.card ? " · "+e.card : ""}</div>
+        ${e.note ? `<div class="exp-meta" style="font-style:italic">${e.note}</div>` : ""}
+      </div>
+      <div class="exp-right">
+        <div class="exp-amt">${fmt(e.amount)}</div>
+        <div class="exp-who">${e.addedBy}</div>
+        ${state.isAdmin ? `<button class="btn btn-danger btn-sm" style="margin-top:4px" onclick="deleteExpense('${e.id}')">Del</button>` : ""}
+      </div>
+    </div>`).join("")}</div>`;
+}
+
+async function deleteExpense(id) {
+  if (!confirm("Delete this expense?")) return;
+  loading(true);
+  const res = await api(null, { action: "deleteExpense", id });
+  if (res.ok) { showToast("Deleted"); renderHistory(); }
+  else showToast(res.error, "error");
+  loading(false);
+}
+
+// ── CC clear ──────────────────────────────────────────────
+async function clearCC(cardName) {
+  if (!confirm(`Mark all pending entries for ${cardName} as cleared?\n\nRecords are kept — only the pending amount resets.`)) return;
+  loading(true);
+  try {
+    const res = await api(null, { action: "clearCC", card: cardName });
+    if (res.ok) {
+      showToast(`${res.cleared} entries cleared ✓`);
+      const cc = await api({ action: "cc_pending" });
+      state.ccPending = cc.pending || [];
+      renderDashboard();
+    } else showToast(res.error, "error");
+  } catch(e) { showToast("Network error", "error"); }
+  loading(false);
+}
+
+// ── Setup ─────────────────────────────────────────────────
+function switchSetupTab(tab) {
+  ["categories","modes","cards","users"].forEach(t => {
+    document.getElementById(`setup-${t}`).style.display = t === tab ? "" : "none";
+    const btn = document.querySelector(`.tab-btn[onclick="switchSetupTab('${t}')"]`);
+    if (btn) btn.classList.toggle("active", t === tab);
+  });
+}
+
+function renderSetup() {
+  // Categories
+  document.getElementById("cat-list").innerHTML =
+    state.config.categories.map(c => `
+      <div class="setup-list-item">
+        <div>
+          <div style="font-size:0.88rem">${c.name}</div>
+          <div style="font-size:0.72rem;color:var(--muted)">Budget: ${c.budget ? fmt(c.budget) : "None"}</div>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <input type="number" placeholder="budget" style="width:80px;padding:0.3rem 0.5rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:0.78rem" id="budget-${c.name}" value="${c.budget||""}"/>
+          <button class="btn btn-outline btn-sm" onclick="saveBudget('${c.name}')">Save</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCategory('${c.name}')">✕</button>
+        </div>
+      </div>`).join("") || "<span style='color:var(--muted);font-size:0.85rem'>No categories</span>";
+
+  // Modes
+  document.getElementById("mode-list").innerHTML =
+    state.config.modes.map(m => `
+      <div class="setup-list-item">
+        <span style="font-size:0.88rem">${m}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteMode('${m}')">✕</button>
+      </div>`).join("") || "<span style='color:var(--muted);font-size:0.85rem'>No modes</span>";
+
+  // Cards
+  document.getElementById("cards-list").innerHTML =
+    state.config.cards.map(c => `
+      <div class="setup-list-item">
+        <div>
+          <div style="font-size:0.88rem">${c.name}</div>
+          <div style="font-size:0.72rem;color:var(--muted);font-family:var(--mono)">···· ${c.last4}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteCard('${c.name}')">✕</button>
+      </div>`).join("") || "<span style='color:var(--muted);font-size:0.85rem'>No cards added</span>";
+
+  // Users (admin only)
+  if (state.isAdmin) {
+    document.getElementById("users-list").innerHTML =
+      `<div style="color:var(--muted);font-size:0.78rem;margin-bottom:0.75rem">Passwords are visible in your Google Sheet. Only share with family.</div>` +
+      (state.config.categories.length ? "" : "") +
+      "<span style='color:var(--muted);font-size:0.85rem'>Open your Google Sheet → Users tab to see all users</span>";
+  }
+}
+
+async function saveBudget(name) {
+  const val = document.getElementById(`budget-${name}`).value;
+  const res = await api(null, { action: "updateBudget", name, budget: parseFloat(val) || 0 });
+  if (res.ok) {
+    showToast("Budget saved");
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    renderDashboard();
+  } else showToast(res.error, "error");
+}
+
+async function addCategory() {
+  const name   = document.getElementById("new-cat-name").value.trim();
+  const budget = parseFloat(document.getElementById("new-cat-budget").value) || 0;
+  if (!name) { showToast("Enter a name", "error"); return; }
+  const res = await api(null, { action: "addCategory", name, budget });
+  if (res.ok) {
+    showToast("Category added");
+    document.getElementById("new-cat-name").value   = "";
+    document.getElementById("new-cat-budget").value = "";
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    populateFormDropdowns();
+  } else showToast(res.error, "error");
+}
+
+async function deleteCategory(name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  const res = await api(null, { action: "deleteCategory", name });
+  if (res.ok) {
+    showToast("Deleted");
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    populateFormDropdowns();
+  } else showToast(res.error, "error");
+}
+
+async function addMode() {
+  const name = document.getElementById("new-mode-name").value.trim();
+  if (!name) { showToast("Enter a name", "error"); return; }
+  const res = await api(null, { action: "addMode", name });
+  if (res.ok) {
+    showToast("Mode added");
+    document.getElementById("new-mode-name").value = "";
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    populateFormDropdowns();
+  } else showToast(res.error, "error");
+}
+
+async function deleteMode(name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  const res = await api(null, { action: "deleteMode", name });
+  if (res.ok) {
+    showToast("Deleted");
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    populateFormDropdowns();
+  } else showToast(res.error, "error");
+}
+
+async function addCard() {
+  const name  = document.getElementById("new-card-name").value.trim();
+  const last4 = document.getElementById("new-card-last4").value.trim();
+  if (!name) { showToast("Enter card name", "error"); return; }
+  const res = await api(null, { action: "addCard", name, last4 });
+  if (res.ok) {
+    showToast("Card added");
+    document.getElementById("new-card-name").value  = "";
+    document.getElementById("new-card-last4").value = "";
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    populateFormDropdowns();
+  } else showToast(res.error, "error");
+}
+
+async function deleteCard(name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  const res = await api(null, { action: "deleteCard", name });
+  if (res.ok) {
+    showToast("Deleted");
+    const cfg = await api({ action: "config" });
+    state.config = cfg;
+    renderSetup();
+    populateFormDropdowns();
+  } else showToast(res.error, "error");
+}
+
+async function addUser() {
+  const name     = document.getElementById("new-user-name").value.trim();
+  const password = document.getElementById("new-user-pass").value.trim();
+  if (!name || !password) { showToast("Fill all fields", "error"); return; }
+  const res = await api(null, { action: "addUser", name, password, isAdmin: false });
+  if (res.ok) {
+    showToast(`User "${name}" added`);
+    document.getElementById("new-user-name").value = "";
+    document.getElementById("new-user-pass").value = "";
+  } else showToast(res.error, "error");
+}
+
+// ── Auto-login from session ───────────────────────────────
+(function checkSession() {
+  const u = sessionStorage.getItem("user");
+  const a = sessionStorage.getItem("isAdmin");
+  if (u) {
+    state.user    = u;
+    state.isAdmin = a === "true";
+    document.getElementById("topbar-user").textContent = u + " · logout";
+    initApp();
+  }
+})();
+</script>
+</body>
+</html>
