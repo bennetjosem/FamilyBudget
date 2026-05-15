@@ -247,7 +247,6 @@ canvas { max-height: 200px; }
 
 <div class="wrap">
 
-  <!-- Header -->
   <header class="header">
     <a href="index.html" class="back-link">
       <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -257,14 +256,12 @@ canvas { max-height: 200px; }
     <div style="width:80px"></div>
   </header>
 
-  <!-- Month nav -->
   <div class="month-nav">
-    <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
+    <button class="mnav-btn" onclick="changeMonth(-1)">&#x2039;</button>
     <span class="mnav-label" id="mnav-label">—</span>
-    <button class="mnav-btn" onclick="changeMonth(1)">›</button>
+    <button class="mnav-btn" onclick="changeMonth(1)">&#x203a;</button>
   </div>
 
-  <!-- Tab bar -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('overview')">Overview</button>
     <button class="tab" onclick="switchTab('history')">History</button>
@@ -272,14 +269,12 @@ canvas { max-height: 200px; }
     <button class="tab" onclick="switchTab('setup')">Setup</button>
   </div>
 
-  <!-- ══ OVERVIEW ═══════════════════════════════════════════ -->
+  <!-- OVERVIEW -->
   <div id="tab-overview">
-
-    <!-- Metrics -->
     <div class="metrics">
       <div class="metric">
         <div class="metric-label">Total spent</div>
-        <div class="metric-val ac" id="ov-total">₹0</div>
+        <div class="metric-val ac" id="ov-total">&#x20B9;0</div>
       </div>
       <div class="metric">
         <div class="metric-label">Transactions</div>
@@ -287,46 +282,40 @@ canvas { max-height: 200px; }
       </div>
     </div>
 
-    <!-- Person split -->
     <div class="card">
       <div class="card-title">By person</div>
       <div class="split-labels">
-        <span class="a">Aleena — <span id="sp-aleena">₹0</span></span>
-        <span class="b">Bennet — <span id="sp-bennet">₹0</span></span>
+        <span class="a">Aleena — <span id="sp-aleena">&#x20B9;0</span></span>
+        <span class="b">Bennet — <span id="sp-bennet">&#x20B9;0</span></span>
       </div>
       <div class="split-bar">
         <div class="split-bar-a" id="split-bar-a" style="width:50%"></div>
-        <div class="split-bar-b" id="split-bar-b"></div>
+        <div class="split-bar-b"></div>
       </div>
     </div>
 
-    <!-- Category chart -->
     <div class="card">
       <div class="card-title">By category</div>
       <canvas id="chart-cat"></canvas>
     </div>
 
-    <!-- Mode chart -->
     <div class="card">
       <div class="card-title">By payment mode</div>
       <canvas id="chart-mode"></canvas>
     </div>
 
-    <!-- Monthly trend -->
     <div class="card">
       <div class="card-title">Monthly trend</div>
       <canvas id="chart-trend"></canvas>
     </div>
 
-    <!-- Budget -->
     <div class="card">
       <div class="card-title">Budget usage</div>
       <div id="budget-list"></div>
     </div>
-
   </div>
 
-  <!-- ══ HISTORY ════════════════════════════════════════════ -->
+  <!-- HISTORY -->
   <div id="tab-history" style="display:none">
     <div class="filters">
       <select class="filter-sel" id="h-cat" onchange="renderHistory()"><option value="">All categories</option></select>
@@ -340,32 +329,26 @@ canvas { max-height: 200px; }
     <div class="card" id="history-list"></div>
   </div>
 
-  <!-- ══ CREDIT CARDS ═══════════════════════════════════════ -->
+  <!-- CREDIT CARDS -->
   <div id="tab-cards" style="display:none">
     <div class="card">
       <div class="card-title">Pending bills</div>
       <div id="cc-list"></div>
     </div>
-    <p style="font-size:0.72rem;color:var(--muted);line-height:1.6">
-      "Clear bill" marks all pending entries for that card as cleared. Records are kept — only the running total resets to ₹0.
-    </p>
+    <p style="font-size:0.72rem;color:var(--muted);line-height:1.6">"Clear bill" marks all pending entries for that card as cleared. Records are kept — running total resets to &#x20B9;0.</p>
   </div>
 
-  <!-- ══ SETUP ══════════════════════════════════════════════ -->
+  <!-- SETUP -->
   <div id="tab-setup" style="display:none">
-
-    <!-- Categories -->
     <div class="card">
       <div class="card-title">Categories</div>
       <div id="s-cats"></div>
       <div class="add-row">
         <input class="mini-input" id="nc-name" placeholder="Category name"/>
-        <input class="mini-input" id="nc-budget" type="number" placeholder="Budget ₹" style="max-width:110px"/>
+        <input class="mini-input" id="nc-budget" type="number" placeholder="Budget" style="max-width:110px"/>
         <button class="btn-add" onclick="addCategory()">Add</button>
       </div>
     </div>
-
-    <!-- Payment modes -->
     <div class="card">
       <div class="card-title">Payment modes</div>
       <div id="s-modes"></div>
@@ -377,8 +360,8 @@ canvas { max-height: 200px; }
         <button class="btn-add" onclick="addMode()">Add</button>
       </div>
     </div>
-
   </div>
+
 </div>
 
 <div id="toast"></div>
@@ -808,740 +791,6 @@ async function delMode(name) {
   const res = await api({action:"delMode",name});
   if (res.ok) { toast("Deleted"); await refreshConfig(); renderSetup(); populateFilters(); }
   else toast(res.error,"err");
-}
-
-init();
-</script>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:     #0a0a0f;
-  --bg2:    #111118;
-  --bg3:    #1a1a24;
-  --border: #2a2a3a;
-  --text:   #eeeef5;
-  --muted:  #6b6b8a;
-  --accent: #c8b4ff;
-  --accent2:#ff9eb5;
-  --green:  #7effc4;
-  --amber:  #ffd97d;
-  --red:    #ff7e7e;
-  --font:   'Syne', sans-serif;
-  --mono:   'JetBrains Mono', monospace;
-  --r:      14px;
-  --r-sm:   8px;
-}
-
-html, body {
-  min-height: 100vh; background: var(--bg);
-  color: var(--text); font-family: var(--font); font-size: 15px;
-}
-body::before {
-  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.5;
-}
-.blob {
-  position: fixed; width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(255,158,181,0.05) 0%, transparent 70%);
-  border-radius: 50%; bottom: -150px; left: -100px;
-  pointer-events: none; z-index: 0;
-}
-
-/* ── Layout ── */
-.wrap { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 0 1.25rem 4rem; }
-
-/* ── Header ── */
-.header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 1.5rem 0 1rem; border-bottom: 1px solid var(--border);
-  margin-bottom: 1.25rem;
-}
-.back-link {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--muted); text-decoration: none;
-  border: 1px solid var(--border); border-radius: 20px;
-  padding: 0.35rem 0.9rem; transition: all 0.2s;
-}
-.back-link:hover { color: var(--accent); border-color: var(--accent); }
-.back-link svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.header-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
-
-/* ── Month nav ── */
-.month-nav {
-  display: flex; align-items: center; gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-.mnav-btn {
-  width: 34px; height: 34px; border-radius: var(--r-sm);
-  background: var(--bg2); border: 1px solid var(--border);
-  color: var(--text); font-size: 1rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color 0.2s;
-}
-.mnav-btn:hover { border-color: var(--accent); }
-.mnav-label { font-family: var(--mono); font-size: 0.85rem; color: var(--text); min-width: 120px; text-align: center; }
-
-/* ── Tab bar ── */
-.tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-.tab {
-  padding: 0.4rem 1rem; border-radius: 20px;
-  background: var(--bg2); border: 1px solid var(--border);
-  color: var(--muted); font-family: var(--font); font-size: 0.78rem;
-  font-weight: 600; cursor: pointer; transition: all 0.2s;
-  letter-spacing: 0.02em;
-}
-.tab.active { background: var(--accent); color: #0a0a0f; border-color: var(--accent); }
-
-/* ── Section titles ── */
-.section-label {
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 0.7rem; display: block;
-}
-
-/* ── Card ── */
-.card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 1.1rem 1.25rem;
-  margin-bottom: 0.85rem; position: relative; overflow: hidden;
-}
-.card-title { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.9rem; }
-
-/* ── Metrics grid ── */
-.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.85rem; }
-.metric { background: var(--bg3); border-radius: var(--r-sm); padding: 1rem 1.1rem; border: 1px solid var(--border); }
-.metric-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.35rem; }
-.metric-val { font-family: var(--mono); font-size: 1.5rem; font-weight: 500; }
-.metric-val.ac  { color: var(--accent); }
-.metric-val.ac2 { color: var(--accent2); }
-.metric-val.gr  { color: var(--green); }
-
-/* ── Person split bar ── */
-.split-bar { height: 8px; border-radius: 4px; overflow: hidden; background: var(--bg3); margin: 0.5rem 0; display: flex; }
-.split-bar-a { background: var(--accent); transition: width 0.5s; }
-.split-bar-b { background: var(--accent2); transition: width 0.5s; flex: 1; }
-.split-labels { display: flex; justify-content: space-between; font-size: 0.72rem; }
-.split-labels .a { color: var(--accent); }
-.split-labels .b { color: var(--accent2); }
-
-/* ── Budget bars ── */
-.budget-row { margin-bottom: 0.85rem; }
-.budget-head { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 0.3rem; }
-.budget-bar-bg { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.budget-bar { height: 100%; border-radius: 3px; transition: width 0.5s; }
-
-/* ── CC cards ── */
-.cc-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.75rem 0; border-bottom: 1px solid var(--border);
-}
-.cc-item:last-child { border-bottom: none; }
-.cc-name { font-size: 0.9rem; font-weight: 600; }
-.cc-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-.cc-amt { font-family: var(--mono); font-weight: 500; color: var(--amber); font-size: 1rem; }
-.cc-amt.zero { color: var(--green); }
-.btn-clear {
-  font-size: 0.72rem; padding: 0.35rem 0.75rem;
-  border-radius: 20px; border: 1px solid var(--border);
-  background: transparent; color: var(--text); cursor: pointer;
-  font-family: var(--font); transition: all 0.2s; margin-left: 0.75rem;
-}
-.btn-clear:hover { border-color: var(--green); color: var(--green); }
-
-/* ── History ── */
-.filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
-.filter-sel {
-  padding: 0.35rem 0.75rem; background: var(--bg2);
-  border: 1px solid var(--border); border-radius: 20px;
-  color: var(--text); font-family: var(--font); font-size: 0.75rem;
-  outline: none; cursor: pointer; appearance: none;
-}
-.exp-item {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.65rem 0; border-bottom: 1px solid var(--border);
-}
-.exp-item:last-child { border-bottom: none; }
-.exp-icon { width: 34px; height: 34px; border-radius: 50%; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
-.exp-info { flex: 1; min-width: 0; }
-.exp-cat { font-size: 0.85rem; font-weight: 600; }
-.exp-meta { font-size: 0.7rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.exp-right { text-align: right; flex-shrink: 0; }
-.exp-amt { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
-.exp-who { font-size: 0.68rem; margin-top: 1px; }
-.exp-who.a { color: var(--accent); }
-.exp-who.b { color: var(--accent2); }
-.btn-del {
-  font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 4px;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--muted); cursor: pointer; margin-top: 3px;
-  font-family: var(--font); transition: all 0.15s;
-}
-.btn-del:hover { border-color: var(--red); color: var(--red); }
-.cc-badge {
-  display: inline-block; font-size: 0.6rem; padding: 1px 5px;
-  border-radius: 3px; background: rgba(200,180,255,0.1);
-  color: var(--accent); margin-left: 4px; vertical-align: middle;
-}
-
-/* ── Setup ── */
-.setup-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.6rem 0; border-bottom: 1px solid var(--border);
-}
-.setup-item:last-child { border-bottom: none; }
-.setup-item-name { font-size: 0.88rem; }
-.setup-item-sub  { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
-.btn-del-setup {
-  font-size: 0.7rem; padding: 0.25rem 0.6rem; border-radius: 4px;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--muted); cursor: pointer; font-family: var(--font);
-  transition: all 0.15s; flex-shrink: 0;
-}
-.btn-del-setup:hover { border-color: var(--red); color: var(--red); }
-.add-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-.mini-input {
-  flex: 1; padding: 0.6rem 0.8rem; background: var(--bg3);
-  border: 1px solid var(--border); border-radius: var(--r-sm);
-  color: var(--text); font-family: var(--font); font-size: 0.85rem; outline: none;
-}
-.mini-input:focus { border-color: var(--accent); }
-.btn-add {
-  padding: 0.6rem 1rem; background: var(--accent); color: #0a0a0f;
-  border: none; border-radius: var(--r-sm); font-family: var(--font);
-  font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap;
-}
-
-/* ── Toast ── */
-#toast {
-  position: fixed; bottom: 1.5rem; left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 20px; padding: 0.55rem 1.2rem;
-  font-size: 0.82rem; opacity: 0; transition: all 0.25s;
-  z-index: 100; pointer-events: none; white-space: nowrap;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#toast.ok  { border-color: var(--green); color: var(--green); }
-#toast.err { border-color: var(--accent2); color: var(--accent2); }
-
-/* ── Loading ── */
-#loading {
-  position: fixed; inset: 0; z-index: 50; display: none;
-  align-items: center; justify-content: center;
-  background: rgba(10,10,15,0.7);
-}
-#loading.on { display: flex; }
-.spinner {
-  width: 24px; height: 24px; border: 2px solid var(--border);
-  border-top-color: var(--accent); border-radius: 50%;
-  animation: rot 0.6s linear infinite;
-}
-@keyframes rot { to { transform: rotate(360deg); } }
-
-/* ── Chart canvas sizing ── */
-canvas { max-height: 200px; }
-</style>
-</head>
-<body>
-<div class="blob"></div>
-<div id="loading"><div class="spinner"></div></div>
-
-<div class="wrap">
-
-  <!-- Header -->
-  <header class="header">
-    <a href="index.html" class="back-link">
-      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Home
-    </a>
-    <div class="header-title">Dashboard</div>
-    <div style="width:80px"></div>
-  </header>
-
-  <!-- Month nav -->
-  <div class="month-nav">
-    <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
-    <span class="mnav-label" id="mnav-label">—</span>
-    <button class="mnav-btn" onclick="changeMonth(1)">›</button>
-  </div>
-
-  <!-- Tab bar -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('overview')">Overview</button>
-    <button class="tab" onclick="switchTab('history')">History</button>
-    <button class="tab" onclick="switchTab('cards')">Credit Cards</button>
-    <button class="tab" onclick="switchTab('setup')">Setup</button>
-  </div>
-
-  <!-- ══ OVERVIEW ═══════════════════════════════════════════ -->
-  <div id="tab-overview">
-
-    <!-- Metrics -->
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-label">Total spent</div>
-        <div class="metric-val ac" id="ov-total">₹0</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Transactions</div>
-        <div class="metric-val" id="ov-count">0</div>
-      </div>
-    </div>
-
-    <!-- Person split -->
-    <div class="card">
-      <div class="card-title">By person</div>
-      <div class="split-labels">
-        <span class="a">Aleena — <span id="sp-aleena">₹0</span></span>
-        <span class="b">Bennet — <span id="sp-bennet">₹0</span></span>
-      </div>
-      <div class="split-bar">
-        <div class="split-bar-a" id="split-bar-a" style="width:50%"></div>
-        <div class="split-bar-b" id="split-bar-b"></div>
-      </div>
-    </div>
-
-    <!-- Category chart -->
-    <div class="card">
-      <div class="card-title">By category</div>
-      <canvas id="chart-cat"></canvas>
-    </div>
-
-    <!-- Mode chart -->
-    <div class="card">
-      <div class="card-title">By payment mode</div>
-      <canvas id="chart-mode"></canvas>
-    </div>
-
-    <!-- Monthly trend -->
-    <div class="card">
-      <div class="card-title">Monthly trend</div>
-      <canvas id="chart-trend"></canvas>
-    </div>
-
-    <!-- Budget -->
-    <div class="card">
-      <div class="card-title">Budget usage</div>
-      <div id="budget-list"></div>
-    </div>
-
-  </div>
-
-  <!-- ══ HISTORY ════════════════════════════════════════════ -->
-  <div id="tab-history" style="display:none">
-    <div class="filters">
-      <select class="filter-sel" id="h-cat" onchange="renderHistory()"><option value="">All categories</option></select>
-      <select class="filter-sel" id="h-person" onchange="renderHistory()">
-        <option value="">All people</option>
-        <option>Aleena</option>
-        <option>Bennet</option>
-      </select>
-      <select class="filter-sel" id="h-mode" onchange="renderHistory()"><option value="">All modes</option></select>
-    </div>
-    <div class="card" id="history-list"></div>
-  </div>
-
-  <!-- ══ CREDIT CARDS ═══════════════════════════════════════ -->
-  <div id="tab-cards" style="display:none">
-    <div class="card">
-      <div class="card-title">Pending bills</div>
-      <div id="cc-list"></div>
-    </div>
-    <p style="font-size:0.72rem;color:var(--muted);line-height:1.6">
-      "Clear bill" marks all pending entries for that card as cleared. Records are kept — only the running total resets to ₹0.
-    </p>
-  </div>
-
-  <!-- ══ SETUP ══════════════════════════════════════════════ -->
-  <div id="tab-setup" style="display:none">
-
-    <!-- Categories -->
-    <div class="card">
-      <div class="card-title">Categories</div>
-      <div id="s-cats"></div>
-      <div class="add-row">
-        <input class="mini-input" id="nc-name" placeholder="Category name"/>
-        <input class="mini-input" id="nc-budget" type="number" placeholder="Budget ₹" style="max-width:110px"/>
-        <button class="btn-add" onclick="addCategory()">Add</button>
-      </div>
-    </div>
-
-    <!-- Payment modes -->
-    <div class="card">
-      <div class="card-title">Payment modes</div>
-      <div id="s-modes"></div>
-      <div class="add-row">
-        <input class="mini-input" id="nm-name" placeholder="Mode name (e.g. ICICI)"/>
-        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--muted);white-space:nowrap">
-          <input type="checkbox" id="nm-iscard"/> Credit card
-        </label>
-        <button class="btn-add" onclick="addMode()">Add</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<script>
-// ── CONFIG ───────────────────────────────────────────────────
-const API = "https://script.google.com/macros/s/AKfycbziSXSHS-ICs5nqZ-GV1Pajned-dVCh5Tp9pZoKsctlCHo483qOZtEG_fkTVgcZoX0s/exec";
-
-// ── State ────────────────────────────────────────────────────
-let state = {
-  month: currentYM(),
-  config: { categories:[], modes:[] },
-  expenses: [],
-  summary: [],
-  ccPending: [],
-  charts: {}
-};
-
-// ── Helpers ──────────────────────────────────────────────────
-function currentYM() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-}
-function ymLabel(m) {
-  const [y,mo] = m.split("-");
-  return new Date(y,mo-1).toLocaleString("en-IN",{month:"long",year:"numeric"});
-}
-const fmt = n => "₹" + Number(n).toLocaleString("en-IN",{maximumFractionDigits:0});
-
-function toast(msg, type="ok") {
-  const el = document.getElementById("toast");
-  el.textContent = msg; el.className = `show ${type}`;
-  setTimeout(()=>el.className="",2400);
-}
-function loading(on) { document.getElementById("loading").classList.toggle("on",on); }
-
-async function api(params) {
-  const r = await fetch(`${API}?${new URLSearchParams(params)}`);
-  return r.json();
-}
-
-// ── Tab switching ─────────────────────────────────────────────
-function switchTab(tab) {
-  ["overview","history","cards","setup"].forEach(t=>{
-    document.getElementById(`tab-${t}`).style.display = t===tab ? "" : "none";
-  });
-  document.querySelectorAll(".tab").forEach((b,i)=>{
-    b.classList.toggle("active", ["overview","history","cards","setup"][i]===tab);
-  });
-  if (tab==="history") renderHistory();
-  if (tab==="cards")   renderCC();
-  if (tab==="setup")   renderSetup();
-}
-
-// ── Month nav ─────────────────────────────────────────────────
-async function changeMonth(dir) {
-  const [y,m] = state.month.split("-").map(Number);
-  const d = new Date(y, m-1+dir);
-  state.month = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-  document.getElementById("mnav-label").textContent = ymLabel(state.month);
-  loading(true);
-  const exp = await api({action:"expenses",month:state.month});
-  state.expenses = exp.expenses||[];
-  const sum = await api({action:"summary"});
-  state.summary = sum.summary||[];
-  loading(false);
-  renderOverview();
-}
-
-// ── Init ──────────────────────────────────────────────────────
-async function init() {
-  document.getElementById("mnav-label").textContent = ymLabel(state.month);
-  loading(true);
-
-  try {
-    const cfg = await api({action:"config"});
-    state.config = cfg;
-  } catch(e) { toast("Failed to load config: " + e.message, "err"); loading(false); return; }
-
-  try {
-    const exp = await api({action:"expenses", month:state.month});
-    state.expenses = exp.expenses || [];
-  } catch(e) { state.expenses = []; }
-
-  try {
-    const sum = await api({action:"summary"});
-    state.summary = sum.summary || [];
-  } catch(e) { state.summary = []; }
-
-  try {
-    const cc = await api({action:"ccpending"});
-    state.ccPending = cc.pending || [];
-  } catch(e) { state.ccPending = []; }
-
-  loading(false);
-  populateFilters();
-  renderOverview();
-}
-
-function populateFilters() {
-  const catSel  = document.getElementById("h-cat");
-  const modeSel = document.getElementById("h-mode");
-  state.config.categories.forEach(c=>{
-    catSel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-  });
-  state.config.modes.forEach(m=>{
-    modeSel.innerHTML += `<option value="${m.name}">${m.name}</option>`;
-  });
-}
-
-// ── Overview ──────────────────────────────────────────────────
-function renderOverview() {
-  const md = state.summary.find(s=>s.month===state.month) || {total:0,byCategory:{},byPerson:{},byMode:{}};
-  const exps = state.expenses;
-
-  document.getElementById("ov-total").textContent = fmt(md.total);
-  document.getElementById("ov-count").textContent = exps.length;
-
-  const aleena = md.byPerson["Aleena"]||0;
-  const bennet = md.byPerson["Bennet"]||0;
-  const ttl    = aleena+bennet||1;
-  const aPct   = Math.round((aleena/ttl)*100);
-  document.getElementById("sp-aleena").textContent = fmt(aleena);
-  document.getElementById("sp-bennet").textContent = fmt(bennet);
-  document.getElementById("split-bar-a").style.width = aPct+"%";
-
-  renderBarChart("chart-cat",
-    Object.keys(md.byCategory), Object.values(md.byCategory),
-    ["#c8b4ff","#ff9eb5","#7effc4","#ffd97d","#ff7e7e","#7eb8ff","#ffb37e","#b4ffd6","#d4b4ff"]
-  );
-  renderDoughnut("chart-mode",
-    Object.keys(md.byMode), Object.values(md.byMode)
-  );
-
-  const trend = [...state.summary].sort((a,b)=>a.month.localeCompare(b.month)).slice(-6);
-  renderLine("chart-trend", trend.map(s=>ymLabel(s.month)), trend.map(s=>s.total));
-
-  // Budget
-  const bl = document.getElementById("budget-list");
-  const budgetCats = state.config.categories.filter(c=>c.budget>0);
-  if (!budgetCats.length) { bl.innerHTML=`<span style="font-size:0.8rem;color:var(--muted)">No budgets set. Add in Setup → Categories.</span>`; }
-  else bl.innerHTML = budgetCats.map(c=>{
-    const spent = md.byCategory[c.name]||0;
-    const pct   = Math.min(100,Math.round((spent/c.budget)*100));
-    const color = pct>90?"var(--red)":pct>70?"var(--amber)":"var(--green)";
-    return `<div class="budget-row">
-      <div class="budget-head">
-        <span style="font-size:0.82rem">${c.name}</span>
-        <span style="font-size:0.72rem;color:var(--muted)">${fmt(spent)} / ${fmt(c.budget)} · ${pct}%</span>
-      </div>
-      <div class="budget-bar-bg"><div class="budget-bar" style="width:${pct}%;background:${color}"></div></div>
-    </div>`;
-  }).join("");
-}
-
-// ── Charts ────────────────────────────────────────────────────
-const chartDefaults = {
-  color:"#6b6b8a",
-  font:{family:"'JetBrains Mono'",size:10}
-};
-Chart.defaults.color = chartDefaults.color;
-Chart.defaults.font  = chartDefaults.font;
-
-function killChart(id) { if(state.charts[id]){state.charts[id].destroy();delete state.charts[id];} }
-
-function renderBarChart(id, labels, data, colors) {
-  killChart(id);
-  const ctx = document.getElementById(id).getContext("2d");
-  state.charts[id] = new Chart(ctx, {
-    type:"bar",
-    data:{ labels, datasets:[{ data, backgroundColor:colors||"#c8b4ff", borderRadius:6, borderSkipped:false }] },
-    options:{
-      responsive:true, plugins:{legend:{display:false}},
-      scales:{
-        x:{ ticks:{color:"#6b6b8a",font:{size:10}}, grid:{display:false} },
-        y:{ ticks:{color:"#6b6b8a",font:{size:10},callback:v=>"₹"+Number(v).toLocaleString("en-IN")}, grid:{color:"#2a2a3a"} }
-      }
-    }
-  });
-}
-
-function renderDoughnut(id, labels, data) {
-  killChart(id);
-  const ctx = document.getElementById(id).getContext("2d");
-  state.charts[id] = new Chart(ctx, {
-    type:"doughnut",
-    data:{ labels, datasets:[{ data, backgroundColor:["#c8b4ff","#ff9eb5","#7effc4","#ffd97d","#ff7e7e","#7eb8ff"], borderWidth:0 }] },
-    options:{ responsive:true, plugins:{ legend:{ position:"right", labels:{ color:"#6b6b8a", font:{size:10}, padding:10 } } } }
-  });
-}
-
-function renderLine(id, labels, data) {
-  killChart(id);
-  const ctx = document.getElementById(id).getContext("2d");
-  state.charts[id] = new Chart(ctx, {
-    type:"line",
-    data:{ labels, datasets:[{ data, borderColor:"#c8b4ff", backgroundColor:"rgba(200,180,255,0.07)", fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:"#c8b4ff" }] },
-    options:{
-      responsive:true, plugins:{legend:{display:false}},
-      scales:{
-        x:{ ticks:{color:"#6b6b8a",font:{size:10}}, grid:{display:false} },
-        y:{ ticks:{color:"#6b6b8a",font:{size:10},callback:v=>"₹"+Number(v).toLocaleString("en-IN")}, grid:{color:"#2a2a3a"} }
-      }
-    }
-  });
-}
-
-// ── History ───────────────────────────────────────────────────
-const catEmoji = {"Groceries":"🛒","Rent / EMI":"🏠","Transport":"🚗","Eating Out":"🍽️","Medical":"💊","Utilities":"⚡","Entertainment":"🎬","Shopping":"🛍️","Others":"📦"};
-
-function renderHistory() {
-  const cat    = document.getElementById("h-cat").value;
-  const person = document.getElementById("h-person").value;
-  const mode   = document.getElementById("h-mode").value;
-
-  let list = state.expenses.slice().sort((a,b)=>b.date.localeCompare(a.date));
-  if (cat)    list = list.filter(e=>e.category===cat);
-  if (person) list = list.filter(e=>e.addedBy===person);
-  if (mode)   list = list.filter(e=>e.mode===mode);
-
-  const el = document.getElementById("history-list");
-  if (!list.length) {
-    el.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.85rem">No expenses found</div>`;
-    return;
-  }
-
-  el.innerHTML = list.map(e=>`
-    <div class="exp-item">
-      <div class="exp-icon">${catEmoji[e.category]||"💰"}</div>
-      <div class="exp-info">
-        <div class="exp-cat">${e.category}${e.ccCleared?'<span class="cc-badge">cleared</span>':""}</div>
-        <div class="exp-meta">${e.date} · ${e.mode}${e.note?" · "+e.note:""}</div>
-      </div>
-      <div class="exp-right">
-        <div class="exp-amt">${fmt(e.amount)}</div>
-        <div class="exp-who ${e.addedBy==="Aleena"?"a":"b"}">${e.addedBy}</div>
-        <button class="btn-del" onclick="deleteExpense('${e.id}')">delete</button>
-      </div>
-    </div>`).join("");
-}
-
-async function deleteExpense(id) {
-  if (!confirm("Delete this entry?")) return;
-  loading(true);
-  const res = await api({action:"deleteExpense",id});
-  if (res.ok) {
-    toast("Deleted");
-    const exp = await api({action:"expenses",month:state.month});
-    state.expenses = exp.expenses||[];
-    renderHistory();
-    renderOverview();
-  } else toast(res.error||"Error","err");
-  loading(false);
-}
-
-// ── Credit cards ──────────────────────────────────────────────
-function renderCC() {
-  const el = document.getElementById("cc-list");
-  if (!state.ccPending.length) {
-    el.innerHTML = `<span style="font-size:0.82rem;color:var(--muted)">No credit cards set up. Add card modes in Setup with "Credit card" checked.</span>`;
-    return;
-  }
-  el.innerHTML = state.ccPending.map(c=>`
-    <div class="cc-item">
-      <div>
-        <div class="cc-name">${c.card}</div>
-        <div class="cc-meta">${c.count} pending entries${c.lastCleared?" · last cleared "+c.lastCleared:""}</div>
-      </div>
-      <div style="display:flex;align-items:center">
-        <div class="cc-amt ${c.pending===0?"zero":""}">${fmt(c.pending)}</div>
-        ${c.pending>0?`<button class="btn-clear" onclick="clearCC('${c.card}')">Clear bill</button>`:`<span style="font-size:0.72rem;color:var(--green);margin-left:0.75rem">✓ cleared</span>`}
-      </div>
-    </div>`).join("");
-}
-
-async function clearCC(card) {
-  if (!confirm(`Mark all pending ${card} entries as cleared?\n\nRecords are kept — running total resets to ₹0.`)) return;
-  loading(true);
-  const res = await api({action:"clearCC",card});
-  if (res.ok) {
-    toast(`${res.cleared} entries cleared ✓`);
-    const cc = await api({action:"ccpending"});
-    state.ccPending = cc.pending||[];
-    renderCC();
-  } else toast(res.error||"Error","err");
-  loading(false);
-}
-
-// ── Setup ─────────────────────────────────────────────────────
-function renderSetup() {
-  // Categories
-  document.getElementById("s-cats").innerHTML = state.config.categories.map(c=>`
-    <div class="setup-item">
-      <div>
-        <div class="setup-item-name">${c.name}</div>
-        <div class="setup-item-sub">Budget: ${c.budget?fmt(c.budget):"—"} &nbsp;
-          <input type="number" placeholder="edit budget" style="width:90px;padding:2px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.72rem;font-family:var(--font)" id="b-${c.name}" value="${c.budget||""}"/>
-          <button onclick="saveBudget('${c.name}')" style="font-size:0.68rem;padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;margin-left:4px">save</button>
-        </div>
-      </div>
-      <button class="btn-del-setup" onclick="delCategory('${c.name}')">✕</button>
-    </div>`).join("") || `<span style="font-size:0.8rem;color:var(--muted)">No categories</span>`;
-
-  // Modes
-  document.getElementById("s-modes").innerHTML = state.config.modes.map(m=>`
-    <div class="setup-item">
-      <div>
-        <div class="setup-item-name">${m.isCard?"💳 ":""}${m.name}</div>
-        <div class="setup-item-sub">${m.isCard?"Credit card":"Regular mode"}</div>
-      </div>
-      <button class="btn-del-setup" onclick="delMode('${m.name}')">✕</button>
-    </div>`).join("") || `<span style="font-size:0.8rem;color:var(--muted)">No modes</span>`;
-}
-
-async function saveBudget(name) {
-  const val = document.getElementById(`b-${name}`).value;
-  const res = await api({action:"updateBudget",name,budget:parseFloat(val)||0});
-  if(res.ok){ toast("Budget saved"); await refreshConfig(); renderSetup(); renderOverview(); }
-  else toast(res.error,"err");
-}
-
-async function addCategory() {
-  const name   = document.getElementById("nc-name").value.trim();
-  const budget = parseFloat(document.getElementById("nc-budget").value)||0;
-  if(!name){ toast("Enter a name","err"); return; }
-  const res = await api({action:"addCategory",name,budget});
-  if(res.ok){ toast("Added"); document.getElementById("nc-name").value=""; document.getElementById("nc-budget").value=""; await refreshConfig(); renderSetup(); }
-  else toast(res.error,"err");
-}
-
-async function delCategory(name) {
-  if(!confirm(`Delete "${name}"?`)) return;
-  const res = await api({action:"delCategory",name});
-  if(res.ok){ toast("Deleted"); await refreshConfig(); renderSetup(); }
-  else toast(res.error,"err");
-}
-
-async function addMode() {
-  const name   = document.getElementById("nm-name").value.trim();
-  const isCard = document.getElementById("nm-iscard").checked;
-  if(!name){ toast("Enter a name","err"); return; }
-  const res = await api({action:"addMode",name,isCard});
-  if(res.ok){
-    toast("Added"); document.getElementById("nm-name").value=""; document.getElementById("nm-iscard").checked=false;
-    await refreshConfig(); renderSetup();
-    const cc = await api({action:"ccpending"}); state.ccPending = cc.pending||[];
-  } else toast(res.error,"err");
-}
-
-async function delMode(name) {
-  if(!confirm(`Delete "${name}"?`)) return;
-  const res = await api({action:"delMode",name});
-  if(res.ok){ toast("Deleted"); await refreshConfig(); renderSetup(); }
-  else toast(res.error,"err");
-}
-
-async function refreshConfig() {
-  const cfg = await api({action:"config"});
-  state.config = cfg;
 }
 
 init();
