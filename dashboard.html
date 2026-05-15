@@ -385,7 +385,7 @@ canvas { max-height: 200px; }
 
 <script>
 // ── CONFIG ───────────────────────────────────────────────────
-const API = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const API = "https://script.google.com/macros/s/AKfycbziSXSHS-ICs5nqZ-GV1Pajned-dVCh5Tp9pZoKsctlCHo483qOZtEG_fkTVgcZoX0s/exec";
 
 // ── State ────────────────────────────────────────────────────
 let state = {
@@ -452,18 +452,27 @@ async function changeMonth(dir) {
 async function init() {
   document.getElementById("mnav-label").textContent = ymLabel(state.month);
   loading(true);
+
   try {
-    const [cfg, exp, sum, cc] = await Promise.all([
-      api({action:"config"}),
-      api({action:"expenses",month:state.month}),
-      api({action:"summary"}),
-      api({action:"ccpending"})
-    ]);
-    state.config   = cfg;
-    state.expenses = exp.expenses||[];
-    state.summary  = sum.summary||[];
-    state.ccPending= cc.pending||[];
-  } catch(e) { toast("Cannot load data — check API URL","err"); loading(false); return; }
+    const cfg = await api({action:"config"});
+    state.config = cfg;
+  } catch(e) { toast("Failed to load config: " + e.message, "err"); loading(false); return; }
+
+  try {
+    const exp = await api({action:"expenses", month:state.month});
+    state.expenses = exp.expenses || [];
+  } catch(e) { state.expenses = []; }
+
+  try {
+    const sum = await api({action:"summary"});
+    state.summary = sum.summary || [];
+  } catch(e) { state.summary = []; }
+
+  try {
+    const cc = await api({action:"ccpending"});
+    state.ccPending = cc.pending || [];
+  } catch(e) { state.ccPending = []; }
+
   loading(false);
   populateFilters();
   renderOverview();
