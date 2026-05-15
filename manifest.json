@@ -3,9 +3,9 @@
   "short_name": "Expenses",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "description": "Family expense tracker",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "description": "Family expense tracker for Aleena & Bennet",
   "icons": [
     { "src": "https://api.iconify.design/twemoji/house.svg", "sizes": "192x192", "type": "image/svg+xml" }
   ]
