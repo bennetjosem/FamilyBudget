@@ -385,7 +385,7 @@ canvas { max-height: 200px; }
 
 <script>
 // ── CONFIG ───────────────────────────────────────────────────
-const API = "https://script.google.com/macros/s/AKfycbxLx5TZ8wcZY72JyCK8qpEoe_uqRW9NwW-0q0ZwQhhLG7K5iMBQaC90Ma5N1rpetL8Z/exec";
+const API = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
 // ── State ────────────────────────────────────────────────────
 let state = {
@@ -415,11 +415,7 @@ function toast(msg, type="ok") {
 }
 function loading(on) { document.getElementById("loading").classList.toggle("on",on); }
 
-async function api(params, body=null) {
-  if (body) {
-    const r = await fetch(API,{method:"POST",body:JSON.stringify(body),headers:{"Content-Type":"application/json"}});
-    return r.json();
-  }
+async function api(params) {
   const r = await fetch(`${API}?${new URLSearchParams(params)}`);
   return r.json();
 }
@@ -618,7 +614,7 @@ function renderHistory() {
 async function deleteExpense(id) {
   if (!confirm("Delete this entry?")) return;
   loading(true);
-  const res = await api(null,{action:"deleteExpense",id});
+  const res = await api({action:"deleteExpense",id});
   if (res.ok) {
     toast("Deleted");
     const exp = await api({action:"expenses",month:state.month});
@@ -652,7 +648,7 @@ function renderCC() {
 async function clearCC(card) {
   if (!confirm(`Mark all pending ${card} entries as cleared?\n\nRecords are kept — running total resets to ₹0.`)) return;
   loading(true);
-  const res = await api(null,{action:"clearCC",card});
+  const res = await api({action:"clearCC",card});
   if (res.ok) {
     toast(`${res.cleared} entries cleared ✓`);
     const cc = await api({action:"ccpending"});
@@ -690,7 +686,7 @@ function renderSetup() {
 
 async function saveBudget(name) {
   const val = document.getElementById(`b-${name}`).value;
-  const res = await api(null,{action:"updateBudget",name,budget:parseFloat(val)||0});
+  const res = await api({action:"updateBudget",name,budget:parseFloat(val)||0});
   if(res.ok){ toast("Budget saved"); await refreshConfig(); renderSetup(); renderOverview(); }
   else toast(res.error,"err");
 }
@@ -699,14 +695,14 @@ async function addCategory() {
   const name   = document.getElementById("nc-name").value.trim();
   const budget = parseFloat(document.getElementById("nc-budget").value)||0;
   if(!name){ toast("Enter a name","err"); return; }
-  const res = await api(null,{action:"addCategory",name,budget});
+  const res = await api({action:"addCategory",name,budget});
   if(res.ok){ toast("Added"); document.getElementById("nc-name").value=""; document.getElementById("nc-budget").value=""; await refreshConfig(); renderSetup(); }
   else toast(res.error,"err");
 }
 
 async function delCategory(name) {
   if(!confirm(`Delete "${name}"?`)) return;
-  const res = await api(null,{action:"delCategory",name});
+  const res = await api({action:"delCategory",name});
   if(res.ok){ toast("Deleted"); await refreshConfig(); renderSetup(); }
   else toast(res.error,"err");
 }
@@ -715,7 +711,7 @@ async function addMode() {
   const name   = document.getElementById("nm-name").value.trim();
   const isCard = document.getElementById("nm-iscard").checked;
   if(!name){ toast("Enter a name","err"); return; }
-  const res = await api(null,{action:"addMode",name,isCard});
+  const res = await api({action:"addMode",name,isCard});
   if(res.ok){
     toast("Added"); document.getElementById("nm-name").value=""; document.getElementById("nm-iscard").checked=false;
     await refreshConfig(); renderSetup();
@@ -725,7 +721,7 @@ async function addMode() {
 
 async function delMode(name) {
   if(!confirm(`Delete "${name}"?`)) return;
-  const res = await api(null,{action:"delMode",name});
+  const res = await api({action:"delMode",name});
   if(res.ok){ toast("Deleted"); await refreshConfig(); renderSetup(); }
   else toast(res.error,"err");
 }
