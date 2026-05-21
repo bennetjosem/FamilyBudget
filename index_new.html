@@ -414,10 +414,11 @@ async function init() {
     ]);
     config   = cfg;
     expenses = exp;
-  } catch(e) {
-    document.getElementById("month-sub").textContent = "Could not reach Supabase — check your URL and key";
-    return;
-  }
+  } ccatch(e) {
+  console.error(e);
+  document.getElementById("month-sub").textContent =
+    "Error: " + e.message;
+}
 
   // Populate dropdowns
   const catSel  = document.getElementById("f-category");
