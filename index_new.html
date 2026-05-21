@@ -414,7 +414,7 @@ async function init() {
     ]);
     config   = cfg;
     expenses = exp;
-  } ccatch(e) {
+  } catch(e) {
   console.error(e);
   document.getElementById("month-sub").textContent =
     "Error: " + e.message;
