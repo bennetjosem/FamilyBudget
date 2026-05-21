@@ -308,7 +308,7 @@ body::before {
 
 <script>
 // ── CONFIG — replace with your Supabase project values ───────
-const SUPABASE_URL = "https://kjpnpbfhzclnnyyxwibu.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://kjpnpbfhzclnnyyxwibu.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqcG5wYmZoemNsbm55eXh3aWJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNTk5NzAsImV4cCI6MjA5NDkzNTk3MH0.V3OUjPYnf7jrTVE60lMuM2NY6TaBeh9YJ_-5FqlGAss";
 
 // ── State ────────────────────────────────────────────────────
@@ -329,34 +329,7 @@ function toast(msg, type="ok") {
 }
 
 // ── Supabase helpers ──────────────────────────────────────────
-const sbH = () => ({
-  "Content-Type" : "application/json",
-  "apikey"       : SUPABASE_KEY,
-  "Authorization": `Bearer ${SUPABASE_KEY}`,
-  "Prefer"       : "return=representation"
-});
-
-async function sbGet(table, params="") {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, { headers: sbH() });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function sbPost(table, body) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-    method:"POST", headers: sbH(), body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function sbDelete(table, filter) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
-    method:"DELETE", headers: sbH()
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return true;
-}
+// ── Supabase helpers ───────────────────────────────────────── const sbH = () => ({ "Content-Type": "application/json", "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Prefer": "return=representation" }); async function sbGet(table, params = "") { const url = `${SUPABASE_URL}/rest/v1/${table}?${params}`; const r = await fetch(url, { method: "GET", headers: sbH() }); if (!r.ok) { const txt = await r.text(); console.error("GET ERROR:", txt); throw new Error(txt); } return r.json(); } async function sbPost(table, body) { const url = `${SUPABASE_URL}/rest/v1/${table}`; const r = await fetch(url, { method: "POST", headers: sbH(), body: JSON.stringify(body) }); if (!r.ok) { const txt = await r.text(); console.error("POST ERROR:", txt); throw new Error(txt); } return r.json(); } async function sbDelete(table, filter) { const url = `${SUPABASE_URL}/rest/v1/${table}?${filter}`; const r = await fetch(url, { method: "DELETE", headers: sbH() }); if (!r.ok) { const txt = await r.text(); console.error("DELETE ERROR:", txt); throw new Error(txt); } return true; }
 
 // ── Data functions ────────────────────────────────────────────
 async function fetchConfig() {
