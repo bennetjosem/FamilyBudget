@@ -495,27 +495,52 @@ function renderOverview(){
     return`<div class="budget-row"><div class="budget-head"><span style="font-size:0.82rem">${c.name}</span><span style="font-size:0.72rem;color:var(--muted)">${fmt(spent)} / ${fmt(c.budget)} · ${pct}%</span></div><div class="budget-bar-bg"><div class="budget-bar" style="width:${pct}%;background:${color}"></div></div></div>`;
   }).join("");
 }
+  
+// ── Daily spending bar chart ───────────────────────────────────
+/**
+ * Shows one bar per calendar day in the selected month.
+ * Today's bar is highlighted in accent2 (pink); past days in accent (purple).
+ * Zero-spend days show as empty (height 0) so gaps are visible at a glance.
+ * Only shown for the current ongoing month (makes most sense as a daily tracker).
+ */
 function renderDailyChart() {
-  // build a map of date → total for current month expenses only
-  const dayMap = {};
-  state.expenses
-    .filter(e => e.type === "expense")
-    .forEach(e => {
-      dayMap[e.date] = (dayMap[e.date] || 0) + Number(e.amount);
-    });
-
-  // fill all days of the month so missing days show as 0
-  const [y, m] = state.month.split("-").map(Number);
+  const [y, m]     = state.month.split("-").map(Number);
   const daysInMonth = new Date(y, m, 0).getDate();
-  const labels = [], data = [];
+  const todayStr    = localToday();
+  const isCurrentMonth = state.month === currentYM();
+
+  document.getElementById("daily-month-label").textContent = ymLabel(state.month);
+
+  // Aggregate spend per day: "YYYY-MM-DD" → total
+  const dayMap = {};
+  state.expenses.forEach(e => {
+    dayMap[e.date] = (dayMap[e.date] || 0) + e.amount;
+  });
+
+  // Build labels (day numbers) and totals for all days in month
+  const labels = [];
+  const data   = [];
+  const colors = [];
+
   for (let d = 1; d <= daysInMonth; d++) {
-    const key = `${state.month}-${String(d).padStart(2,"0")}`;
+    const dateStr = `${state.month}-${String(d).padStart(2, "0")}`;
     labels.push(d);
-    data.push(dayMap[key] || 0);
+    data.push(dayMap[dateStr] || 0);
+
+    if (dateStr === todayStr) {
+      colors.push("#ff9eb5");   // today → accent2 (pink)
+    } else if (dateStr > todayStr) {
+      colors.push("rgba(200,180,255,0.15)"); // future → very faint
+    } else {
+      colors.push("#c8b4ff");   // past → accent (purple)
+    }
   }
 
   killChart("chart-daily");
-  if (!data.some(v => v > 0)) return; // don't render empty chart
+  if (!data.some(v => v > 0) && isCurrentMonth) {
+    // No data yet — still render empty chart so the widget is visible
+  }
+
   const ctx = document.getElementById("chart-daily").getContext("2d");
   state.charts["chart-daily"] = new Chart(ctx, {
     type: "bar",
@@ -523,39 +548,49 @@ function renderDailyChart() {
       labels,
       datasets: [{
         data,
-        backgroundColor: data.map(v =>
-          v > 0 ? "rgba(200,180,255,0.7)" : "rgba(200,180,255,0.1)"
-        ),
+        backgroundColor: colors,
         borderRadius: 4,
         borderSkipped: false
       }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: items => {
+              const d = String(items[0].label).padStart(2, "0");
+              return `${state.month}-${d}`;
+            },
+            label: item => " " + fmt(item.raw)
+          }
+        }
+      },
       scales: {
-        x: { ticks: { color: "#6b6b8a", font: { size: 9 } }, grid: { display: false } },
-        y: { ticks: { color: "#6b6b8a", font: { size: 9 }, callback: v => "₹" + Number(v).toLocaleString("en-IN") }, grid: { color: "#2a2a3a" } }
+        x: {
+          ticks: {
+            color: "#6b6b8a",
+            font: { size: 9, family: "'JetBrains Mono'" },
+            maxRotation: 0,
+            // Show every 5th day label to avoid crowding on mobile
+            callback: (val, idx) => (idx + 1) % 5 === 0 || idx === 0 ? idx + 1 : ""
+          },
+          grid: { display: false }
+        },
+        y: {
+          ticks: {
+            color: "#6b6b8a",
+            font: { size: 9, family: "'JetBrains Mono'" },
+            callback: v => v === 0 ? "" : "₹" + Number(v).toLocaleString("en-IN", { notation: "compact" })
+          },
+          grid: { color: "#2a2a3a" },
+          beginAtZero: true
+        }
       }
     }
   });
 }
-
- (function() {
-  const dayMap = {};
-  state.expenses
-    .filter(e => e.type === "expense")
-    .forEach(e => { dayMap[e.date] = (dayMap[e.date] || 0) + Number(e.amount); });
-
-  const [y, m] = state.month.split("-").map(Number);
-  const daysInMonth = new Date(y, m, 0).getDate();
-  const labels = [], data = [];
-  for (let d = 1; d <= daysInMonth; d++) {
-    const key = `${state.month}-${String(d).padStart(2,"0")}`;
-    labels.push(d); data.push(dayMap[key] || 0);
-  }
-  console.log("days:", labels.length, "data:", data, "has data:", data.some(v=>v>0));
-})();
 
   
 function renderTrend(){
