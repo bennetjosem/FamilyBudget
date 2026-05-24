@@ -249,7 +249,7 @@ canvas{max-height:200px;}
       <div class="add-row" style="margin-top:1rem;flex-wrap:wrap;gap:0.5rem">
         <input class="mini-input" id="ng-name" placeholder="Goal name (e.g. Goa Trip)"/>
         <input class="mini-input" id="ng-target" type="number" placeholder="Target ₹" style="max-width:120px"/>
-        <input class="mini-input" id="ng-date" type="month" style="max-width:140px"/>
+        <input class="mini-input" id="ng-date" type="date" placeholder="Target date" style="max-width:140px"/>
         <input class="mini-input" id="ng-desc" placeholder="Description (optional)"/>
         <button class="btn-add" onclick="addGoal()">Add goal</button>
       </div>
@@ -743,7 +743,7 @@ async function addGoal(){
   const desc   = document.getElementById("ng-desc").value.trim();
   if(!name||!target){toast("Enter name and target amount","err");return;}
   try{
-    await sbPost("Goals",{Name:name,TargetAmount:target,TargetDate:date?date+"-01":null,Description:desc});
+    await sbPost("Goals",{Name:name,TargetAmount:target,TargetDate:date||null,Description:desc});
     toast("Goal added");
     document.getElementById("ng-name").value="";
     document.getElementById("ng-target").value="";
