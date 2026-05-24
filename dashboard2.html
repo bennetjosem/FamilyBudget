@@ -218,6 +218,7 @@ canvas{max-height:200px;}
       <div class="split-bar"><div class="split-bar-a" id="split-bar-a" style="width:50%"></div><div class="split-bar-b"></div></div>
     </div>
 
+    <div class="card"><div class="card-title">Daily spending this month</div><canvas id="chart-daily"></canvas></div>
     <div class="card"><div class="card-title">By category</div><canvas id="chart-cat"></canvas></div>
     <div class="card"><div class="card-title">By payment mode</div><canvas id="chart-mode"></canvas></div>
     <div class="card"><div class="card-title">Monthly trend (spending)</div><canvas id="chart-trend"></canvas></div>
@@ -482,6 +483,7 @@ function renderOverview(){
   renderBarChart("chart-cat",cats.map(([k])=>k),cats.map(([,v])=>v),["#c8b4ff","#ff9eb5","#7effc4","#ffd97d","#ff7e7e","#7eb8ff","#ffb37e","#b4ffd6","#d4b4ff"]);
   const modes=Object.entries(md.byMode).filter(([,v])=>v>0);
   renderDoughnut("chart-mode",modes.map(([k])=>k),modes.map(([,v])=>v));
+  renderDailyChart();
   renderTrend();
 
   const bl=document.getElementById("budget-list");
@@ -493,7 +495,51 @@ function renderOverview(){
     return`<div class="budget-row"><div class="budget-head"><span style="font-size:0.82rem">${c.name}</span><span style="font-size:0.72rem;color:var(--muted)">${fmt(spent)} / ${fmt(c.budget)} · ${pct}%</span></div><div class="budget-bar-bg"><div class="budget-bar" style="width:${pct}%;background:${color}"></div></div></div>`;
   }).join("");
 }
+function renderDailyChart() {
+  // build a map of date → total for current month expenses only
+  const dayMap = {};
+  state.expenses
+    .filter(e => e.type === "expense")
+    .forEach(e => {
+      dayMap[e.date] = (dayMap[e.date] || 0) + Number(e.amount);
+    });
 
+  // fill all days of the month so missing days show as 0
+  const [y, m] = state.month.split("-").map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const labels = [], data = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${state.month}-${String(d).padStart(2,"0")}`;
+    labels.push(d);
+    data.push(dayMap[key] || 0);
+  }
+
+  killChart("chart-daily");
+  if (!data.some(v => v > 0)) return; // don't render empty chart
+  const ctx = document.getElementById("chart-daily").getContext("2d");
+  state.charts["chart-daily"] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: data.map(v =>
+          v > 0 ? "rgba(200,180,255,0.7)" : "rgba(200,180,255,0.1)"
+        ),
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#6b6b8a", font: { size: 9 } }, grid: { display: false } },
+        y: { ticks: { color: "#6b6b8a", font: { size: 9 }, callback: v => "₹" + Number(v).toLocaleString("en-IN") }, grid: { color: "#2a2a3a" } }
+      }
+    }
+  });
+}
 function renderTrend(){
   const src=state.allExpenses.length?state.allExpenses:state.expenses;
   const trend=[...computeExpSummary(src)].sort((a,b)=>a.month.localeCompare(b.month)).slice(-6);
