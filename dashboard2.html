@@ -540,6 +540,24 @@ function renderDailyChart() {
     }
   });
 }
+
+ (function() {
+  const dayMap = {};
+  state.expenses
+    .filter(e => e.type === "expense")
+    .forEach(e => { dayMap[e.date] = (dayMap[e.date] || 0) + Number(e.amount); });
+
+  const [y, m] = state.month.split("-").map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const labels = [], data = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${state.month}-${String(d).padStart(2,"0")}`;
+    labels.push(d); data.push(dayMap[key] || 0);
+  }
+  console.log("days:", labels.length, "data:", data, "has data:", data.some(v=>v>0));
+})();
+
+  
 function renderTrend(){
   const src=state.allExpenses.length?state.allExpenses:state.expenses;
   const trend=[...computeExpSummary(src)].sort((a,b)=>a.month.localeCompare(b.month)).slice(-6);
