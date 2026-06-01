@@ -374,7 +374,12 @@ async function fetchConfig(){
   };
 }
 async function fetchMonthExpenses(ym){
-  const[y,m]=ym.split("-").map(Number),from=`${ym}-01`,to=new Date(y,m,0).toISOString().split("T")[0];
+  const[y,m]=ym.split("-").map(Number),from=`${ym}-01`//,to=new Date(y,m,0).toISOString().split("T")[0];
+
+  const lastDay = new Date(y, m, 0).getDate();
+const to = `${String(y)}-${String(m).padStart(2,"0")}-${String(lastDay).padStart(2,"0")}`;
+
+  
   return(await sbGet("Expenses",`select=*&Date=gte.${from}&Date=lte.${to}&order=Date.desc`)).map(mapExp);
 }
 async function fetchAllExpenses(){return(await sbGet("Expenses","select=*&order=Date.desc")).map(mapExp);}
