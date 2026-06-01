@@ -440,7 +440,7 @@ function switchTab(tab){
   if(tab==="cards")renderCC();
   if(tab==="setup")renderSetup();
   if(tab==="investments")renderInvestments();
-  if(tab==="goals")renderGoals();
+  if(tab==="goals") loadGoalsData();
   if(tab==="tags")renderTags();
 }
 
@@ -811,9 +811,23 @@ async function delMode(name){if(!confirm(`Delete "${name}"?`))return;try{await s
 
 
 // ── Goals ─────────────────────────────────────────────────────
+async function loadGoalsData() {
+  if(!state.allInvestments.length || state.allInvestments.length === state.investments.length) {
+    // only current month loaded — fetch all
+    loading(true);
+    try {
+      state.allInvestments = await fetchAllInvestments();
+    } catch(e) {}
+    loading(false);
+  }
+  renderGoals();
+}
+
+  
 function renderGoals(){
   const goals = state.config.goals||[];
-  const allInvs = state.allInvestments.length ? state.allInvestments : state.investments;
+  const allInvs = state.allInvestments;
+  //const allInvs = state.allInvestments.length ? state.allInvestments : state.investments;
 
   // Goals progress cards
   const listEl = document.getElementById("goals-list");
