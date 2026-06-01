@@ -351,7 +351,11 @@ async function fetchConfig() {
 
 async function fetchMonthExpenses(monthYM) {
   const [y,m] = monthYM.split("-").map(Number);
-  const from = `${monthYM}-01`, to = new Date(y,m,0).toISOString().split("T")[0];
+  const from = `${monthYM}-01` //, to = new Date(y,m,0).toISOString().split("T")[0];
+  
+  const lastDay = new Date(y, m, 0).getDate();
+  const to = `${String(y)}-${String(m).padStart(2,"0")}-${String(lastDay).padStart(2,"0")}`;
+  
   const rows = await sbGet("Expenses", `select=*&Date=gte.${from}&Date=lte.${to}&order=Date.desc`);
   return rows.map(r => ({
     id:r.ID, date:r.Date.slice(0,10), amount:r.Amount, category:r.Category,
